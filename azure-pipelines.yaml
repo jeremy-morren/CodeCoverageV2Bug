@@ -1,0 +1,52 @@
+﻿pool:
+  vmImage: 'ubuntu-latest'
+  
+variables:
+  system.debug: 'true'
+
+steps:
+  - task: DotNetCoreCLI@2
+    displayName: Run Tests
+    name: RunTests
+    inputs:
+      command: test
+      testRunTitle: Test $(Build.DefinitionName) on branch $(Build.SourceBranchName)
+      arguments: --collect "XPlat Code Coverage"
+      publishTestResults: true
+      projects: '**/*Tests*.csproj'
+
+  - task: PublishCodeCoverageResults@2
+    displayName: Publish code coverage
+    inputs:
+      summaryFileLocation: $(Agent.TempDirectory)/**/coverage.cobertura.xml
+      failIfCoverageEmpty: true
+    condition: succeededOrFailed()
+
+  # While this is running coverage HTML report from previous step will be visible
+  - pwsh: Start-Sleep -Seconds 30
+    displayName: Sleep
+  
+  #Manually generating the report and publishing with V1 works
+  
+#  - pwsh: |
+#      dotnet tool install --global dotnet-reportgenerator-globaltool
+#
+#      reportgenerator `
+#        '-reports:$(Agent.TempDirectory)/**/coverage.cobertura.xml' `
+#        '-targetdir:$(Agent.TempDirectory)/CodeCoverage' `
+#        '-reporttypes:HtmlInline_AzurePipelines_Dark;Cobertura'
+#    displayName: Create code coverage report
+#    name: CreateCodeCoverageReport
+#    condition: succeededOrFailed()
+#
+#  - task: PublishCodeCoverageResults@1
+#    displayName: Publish code coverage
+#    inputs:
+#      codeCoverageTool: Cobertura
+#      summaryFileLocation: $(Agent.TempDirectory)/CodeCoverage/Cobertura.xml
+#      reportDirectory: $(Agent.TempDirectory)/CodeCoverage
+#      failIfCoverageEmpty: true
+#    condition: succeededOrFailed()
+#    env:
+#      DISABLE_COVERAGE_AUTOGENERATE: 'true'
+#      
