@@ -28,11 +28,10 @@ steps:
   
 #Manually generating the report and publishing with V1 works
   - script: >-
-      dotnet tool install --global dotnet-reportgenerator-globaltool &&
-      reportgenerator
-        '-reports:$(Agent.TempDirectory)/**/coverage.cobertura.xml'
-        '-targetdir:$(Agent.TempDirectory)/CodeCoverage'
-        '-reporttypes:HtmlInline_AzurePipelines;Cobertura'
+      dotnet tool install --global dotnet-reportgenerator-globaltool && reportgenerator
+      '-reports:$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+      '-targetdir:$(Agent.TempDirectory)/CodeCoverage'
+      '-reporttypes:HtmlInline_AzurePipelines;Cobertura'
     displayName: Create code coverage report
     name: CreateCodeCoverageReport
     condition: succeededOrFailed()
